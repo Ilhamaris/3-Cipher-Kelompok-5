@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, send_file, redirect, url_for, flash
-from ciphers import playfair, hill, aes_cfb
+from ciphers import playfair, vig_auto, aes_cfb
 import os
 from werkzeug.utils import secure_filename
 
@@ -17,17 +17,17 @@ os.makedirs(app.config['DECRYPTED_FOLDER'], exist_ok=True)
 
 
 def derive_aes_key_iv(user_key):
-    """Gunakan input user sebagai KEY untuk Playfair & Hill, sedangkan plaintext tetap."""
+    """Gunakan input user sebagai KEY untuk Playfair & Vigg, sedangkan plaintext tetap."""
     plaintext_pf = "KRIPTOGRAFI PLAYFAIR"
-    plaintext_hill = "KRIPTOGRAFI HILL"
+    plaintext_vig = "KRIPTOGRAFI VIGENERE"
 
     # Key dari input user
     pf_ct = playfair.encrypt(plaintext_pf, user_key)
-    hill_ct = hill.encrypt(plaintext_hill, user_key)
+    vig_ct = vig_auto.encrypt(plaintext_vig, user_key)
 
     # Ambil hasil cipher sebagai kunci AES
     aes_key = pf_ct.encode()[:16].ljust(16, b'0')
-    iv = hill_ct.encode()[:16].ljust(16, b'0')
+    iv = vig_ct.encode()[:16].ljust(16, b'0')
 
     return aes_key, iv
 
@@ -39,6 +39,7 @@ def index():
 
 @app.route('/encrypt', methods=['POST'])
 def encrypt_file():
+    # Enkripsi file menggunakan AES-CFB dengan key hasil kombinasi Playfair + Vigenere.
     file = request.files.get('file')
     key = request.form.get('key')
 
@@ -53,9 +54,11 @@ def encrypt_file():
     with open(upload_path, 'rb') as f:
         data = f.read()
 
+    # Hasilkan AES key dan IV dari input key
     aes_key, iv = derive_aes_key_iv(key)
     encrypted_data = aes_cfb.encrypt_bytes(data, aes_key, iv)
 
+    # Simpan hasil enkripsi
     output_filename = filename + ".enc"
     output_path = os.path.join(app.config['ENCRYPTED_FOLDER'], output_filename)
 
@@ -81,10 +84,11 @@ def decrypt_file():
     with open(upload_path, 'rb') as f:
         enc_data = f.read()
 
+    # Hasilkan AES key & IV dari key yang sama
     aes_key, iv = derive_aes_key_iv(key)
     decrypted_data = aes_cfb.decrypt_bytes(enc_data, aes_key, iv)
 
-    # Hapus ekstensi .enc kalau ada
+    # Hapus ekstensi .enc
     if filename.endswith(".enc"):
         filename = filename[:-4]
 
@@ -93,7 +97,6 @@ def decrypt_file():
         f.write(decrypted_data)
 
     return send_file(output_path, as_attachment=True)
-
 
 if __name__ == '__main__':
     app.run(debug=True)
