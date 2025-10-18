@@ -1,44 +1,54 @@
-# AES Pipeline: Playfair -> Hill -> AES-128-CFB
+# 🔐 AES Pipeline: Playfair → Vigenere (Autokey) → AES-128-CFB
 
-This project demonstrates a pipeline of three ciphers:
+<p align="justify">
+Proyek ini mendemonstrasikan pipeline dari tiga algoritma sandi, menggabungkan dua cipher klasik dengan satu cipher modern. Tujuannya adalah menunjukkan bagaimana kombinasi metode enkripsi klasik dan modern dapat memperkuat keamanan data.
+</p>
 
-- Playfair (classic)
-- Hill (2x2 matrix, classic)
-- AES-128 in CFB mode (modern)
+---
 
-Flow (for plaintext example "AKU SUKA MAKAN NASI GORENG"):
-1. Plaintext is encrypted using Playfair (key provided by user).
-2. Playfair ciphertext is used as plaintext input to the Hill cipher (same key).
-3. The Playfair ciphertext bytes are used to derive a 128-bit AES key (first 16 bytes, padded/truncated).
-4. The Hill ciphertext bytes are used to derive a 128-bit IV (first 16 bytes, padded/truncated).
-5. AES-128-CFB encrypts the original plaintext using the derived key and IV.
+## 🧩 Cipher Pipeline
 
-Notes and assumptions:
-- Playfair implementation converts to uppercase, removes non-letters, replaces 'J' with 'I', and pads repeated letters with 'X'.
-- Hill uses a 2x2 matrix derived from the first 4 letters of the key. If the matrix is not invertible modulo 26, small adjustments are attempted to make it invertible.
-- AES key/IV derivation: ASCII bytes of ciphertext are used directly; if shorter than 16 bytes the bytes are right-padded with ASCII '0' (0x30), if longer they are truncated.
-- Decryption of Playfair/Hill will not fully restore whitespace/punctuation; it returns normalized uppercase letters.
+- **Playfair Cipher** (klasik)
+- **Vigenere Autokey Cipher** (klasik)
+- **AES-128 in CFB Mode** (modern)
 
-Run locally (Windows cmd.exe):
+---
 
-```
+## 🔁 Alur Enkripsi
+
+<p align="justify">
+Sebagai contoh, misalkan plaintext: <b>"AKU SUKA MAKAN NASI GORENG"</b>
+</p>
+
+1. 🔸 Plaintext dienkripsi menggunakan **Playfair Cipher** (dengan kunci dari pengguna).
+2. 🔸 Ciphertext hasil Playfair digunakan sebagai input plaintext untuk **Vigenere Autokey Cipher** (menggunakan kunci yang sama).
+3. 🔸 Byte hasil ciphertext Playfair digunakan untuk membentuk **kunci AES 128-bit** (diambil 16 byte pertama, dengan padding atau pemotongan jika perlu).
+4. 🔸 Byte hasil ciphertext Vigenere Autokey digunakan untuk membentuk **IV AES 128-bit** (diambil 16 byte pertama, dengan padding atau pemotongan jika perlu).
+5. 🔸 **AES-128-CFB** mengenkripsi plaintext asli menggunakan _key_ dan _IV_ yang diturunkan tersebut.
+
+---
+
+## 🧠 Catatan dan Asumsi
+
+<p align="justify">
+Beberapa hal penting dalam implementasi:
+</p>
+
+- Playfair Cipher mengubah teks menjadi huruf besar, menghapus karakter non-huruf, mengganti huruf **J → I**, serta menambahkan huruf pengisi **X** pada pasangan huruf ganda.
+- Vigenere Autokey Cipher menggunakan kunci awal dari pengguna dan secara otomatis memperpanjang kunci tersebut menggunakan plaintext untuk membentuk _keystream_ selama proses enkripsi.
+- Proses derivasi AES:
+  - **Key:** diambil dari byte ciphertext Playfair (maks. 16 byte, pad/truncate).
+  - **IV:** diambil dari byte ciphertext Vigenere Autokey (maks. 16 byte, pad/truncate).
+- Hasil dekripsi Playfair dan Vigenere tidak akan sepenuhnya mengembalikan spasi/punktuasi asli, karena output berupa huruf besar terformat.
+
+---
+
+## ⚙️ Cara Menjalankan (Windows CMD)
+
+```bash
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
-cd "D:\MATKUL\SEMESTER 5\KRIPTOGRAFI (P. IKHWAN)\3 Cipher"
+cd "D:\Kripto\FolderAnda\3-Cipher-Kelompok-5"
 python app_aes_pipeline.py
 ```
-
-Open `http://127.0.0.1:5000/` and use the form to encrypt/decrypt.
-
-Files added:
-- `ciphers/playfair.py`
-- `ciphers/hill.py`
-- `ciphers/aes_cfb.py`
-- `app_aes_pipeline.py`
-- `templates/pipeline.html`
-
-If you'd like, I can:
-- Add unit tests
-- Improve decryption spacing reconstruction
-- Provide a downloadable package or a simple CLI wrapper
