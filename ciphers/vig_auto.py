@@ -54,6 +54,6 @@ def decrypt(ciphertext: str, key: str) -> str:
         p_num = (_char_to_num(cc) - _char_to_num(kc)) % 26
         p_char = _num_to_char(p_num)
         plaintext.append(p_char)
-        keystream.append(p_char) 
+        keystream.append(p_char)
 
     return ''.join(plaintext)

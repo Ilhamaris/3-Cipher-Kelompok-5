@@ -122,3 +122,4 @@ def decrypt_file():
 # Jalankan aplikasi Flask
 if __name__ == '__main__':
     app.run(debug=True)
+    
