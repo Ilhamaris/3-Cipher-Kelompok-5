@@ -12,20 +12,27 @@ Proyek ini mengimplementasikan sistem enkripsi pipeline yang menggabungkan tiga 
 - Hasil enkripsi Playfair digunakan sebagai kunci AES (16 byte pertama)
 - Hasil enkripsi Vigenere digunakan sebagai IV (16 byte pertama)
 
-# 2. Proses Enkripsi
-1. User mengunggah file yang ingin dienkripsi
-2. User memasukkan kunci untuk enkripsi
-3. Sistem membangkitkan kunci AES dan IV dari kunci user
-4. File dienkripsi menggunakan AES mode CFB
-5. Hasil enkripsi disimpan dalam format hexadecimal
-6. File terenkripsi (.enc) secara otomatis diunduh
 
-# 3. Proses Dekripsi
-1. User mengunggah file terenkripsi (.enc)
-2. User memasukkan kunci yang sama dengan enkripsi
-3. Sistem membangkitkan kunci AES dan IV yang sama
-4. File didekripsi menggunakan AES mode CFB
-5. Hasil dekripsi secara otomatis diunduh
+# 2. Proses Enkripsi File
+1. Klik tombol "Choose File" dan pilih file yang ingin dienkripsi (bisa berupa file teks, dokumen, gambar, dll).
+2. Masukkan kunci enkripsi (key) sesuai keinginan.
+3. Klik tombol "Encrypt" pada aplikasi web.
+4. Sistem akan membangkitkan kunci AES dan IV dari kunci yang  dimasukkan.
+5. File akan dienkripsi menggunakan algoritma AES mode CFB, dan hasil enkripsi akan disimpan dalam format hexadecimal.
+6. File hasil enkripsi akan otomatis diunduh ke komputer dengan ekstensi tambahan `.enc` (misal: `file.txt` menjadi `file.txt.enc`).
+
+# 3. Proses Dekripsi File
+1. Klik tombol "Choose File" dan pilih file terenkripsi (berekstensi `.enc`).
+2. Masukkan kunci yang sama persis dengan yang digunakan saat enkripsi.
+3. Klik tombol "Decrypt" pada aplikasi web.
+4. Sistem akan membangkitkan kunci AES dan IV yang sama dari kunci yang  dimasukkan.
+5. File akan didekripsi menggunakan algoritma AES mode CFB.
+6. File hasil dekripsi akan otomatis diunduh ke komputer. 
+
+## Catatan Penting
+- File hasil dekripsi akan memiliki format dan ekstensi yang sama seperti file aslinya.
+- Pastikan untuk menggunakan kunci yang sama saat enkripsi dan dekripsi agar file dapat dikembalikan ke bentuk aslinya tanpa kerusakan.
+- Sistem ini dapat mengenkripsi dan mendekripsi berbagai jenis file (teks, gambar, dokumen, dll) tanpa mengubah format file.
 
 ## Teknologi yang Digunakan
 - Python 3
