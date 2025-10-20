@@ -3,10 +3,10 @@ from ciphers import playfair, hill, aes_cfb
 import os
 from werkzeug.utils import secure_filename
 
-app = Flask(__name__)
+app = Flask(__name__) #membuat apliasi Flask
 app.secret_key = "supersecretkey"
 
-# Folder upload dan output
+# Menyimpan folder
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['ENCRYPTED_FOLDER'] = 'encrypted'
 app.config['DECRYPTED_FOLDER'] = 'decrypted'
@@ -16,7 +16,7 @@ os.makedirs(app.config['ENCRYPTED_FOLDER'], exist_ok=True)
 os.makedirs(app.config['DECRYPTED_FOLDER'], exist_ok=True)
 
 
-def derive_aes_key_iv(user_key):
+def derive_aes_key_iv(user_key): 
     """Gunakan input user sebagai KEY untuk Playfair & Hill, sedangkan plaintext tetap."""
     plaintext_pf = "KRIPTOGRAFI PLAYFAIR"
     plaintext_hill = "KRIPTOGRAFI HILL"
