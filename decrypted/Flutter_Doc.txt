@@ -1,0 +1,2 @@
+Release APK
+flutter build apk --release
