@@ -4,7 +4,10 @@ from ciphers import playfair, vig_auto, aes_cfb # Import modul cipher yang telah
 import os # Import os untuk operasi file dan direktori
 from werkzeug.utils import secure_filename # Import secure_filename untuk membersihkan nama file dari karakter berbahaya
 
-# Inisialisasi aplikasi Flask
+import os
+import hashlib
+from werkzeug.utils import secure_filename
+
 app = Flask(__name__)
 # Set secret key untuk keamanan session dan flash messages
 app.secret_key = "supersecretkey"
@@ -20,20 +23,18 @@ os.makedirs(app.config['ENCRYPTED_FOLDER'], exist_ok=True)
 os.makedirs(app.config['DECRYPTED_FOLDER'], exist_ok=True)
 
 
-def derive_aes_key_iv(user_key):
-    
-    # Plaintext tetap yang akan dienkripsi
-    plaintext_pf = "KRIPTOGRAFI PLAYFAIR"
+def derive_aes_key_iv(user_key: str):
+    plaintext_pf  = "KRIPTOGRAFI PLAYFAIR"
     plaintext_vig = "KRIPTOGRAFI VIGENERE"
 
-    # Enkripsi menggunakan kunci dari user
-    pf_ct = playfair.encrypt(plaintext_pf, user_key)    # Hasil enkripsi Playfair
-    vig_ct = vig_auto.encrypt(plaintext_vig, user_key)  # Hasil enkripsi Vigenere
+    pf_ct  = playfair.encrypt(plaintext_pf, user_key)
+    vig_ct = vig_auto.encrypt(plaintext_vig, user_key)
 
-    # Konversi hasil enkripsi menjadi kunci AES dan IV
-    # [:16] mengambil 16 byte pertama, ljust(16, b'0') menambah padding '0' jika kurang dari 16 byte
-    aes_key = pf_ct.encode()[:16].ljust(16, b'0')   # Kunci AES dari hasil Playfair
-    iv = vig_ct.encode()[:16].ljust(16, b'0')       # IV dari hasil Vigenere
+    material = (pf_ct + vig_ct + user_key).encode('utf-8')
+
+    digest = hashlib.sha256(material).digest()  # 32 byte
+    aes_key = digest[:16]   # 128-bit key
+    iv      = digest[16:32] # 128-bit IV
 
     return aes_key, iv
 
@@ -75,7 +76,7 @@ def encrypt_file():
     output_filename = filename + ".enc"  # Tambah ekstensi .enc
     output_path = os.path.join(app.config['ENCRYPTED_FOLDER'], output_filename)
     with open(output_path, 'w') as f:
-        f.write(encrypted_hex)  # Simpan hasil enkripsi dalam format hex
+          f.write(encrypted_hex)
 
     # Kirim file hasil enkripsi ke user untuk diunduh
     return send_file(output_path, as_attachment=True)

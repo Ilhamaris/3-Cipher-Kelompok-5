@@ -1,34 +1,39 @@
 import string
 
+# Tambahan karakter 0-9
+ALPHABET36 = string.ascii_uppercase + "0123456789"
+
 
 def _prepare_text(text: str) -> str:
-    # Uppercase, remove non-letters, replace J with I
-    text = ''.join([c for c in text.upper() if c.isalpha()])
-    text = text.replace('J', 'I')
-    return text
+    # Uppercase, hanya huruf & angka
+    text = ''.join([c for c in text.upper() if c.isalnum()])
+    return text  # Tidak menghapus J lagi
 
 
 def _create_square(key: str) -> list:
     key = _prepare_text(key)
     seen = set()
     square = []
+
+    # Masukkan karakter dari key
     for ch in key:
+        if ch not in seen and ch in ALPHABET36:
+            seen.add(ch)
+            square.append(ch)
+
+    # Tambahkan sisa karakter
+    for ch in ALPHABET36:
         if ch not in seen:
             seen.add(ch)
             square.append(ch)
-    for ch in string.ascii_uppercase:
-        if ch == 'J':
-            continue
-        if ch not in seen:
-            seen.add(ch)
-            square.append(ch)
-    # 5x5
-    return [square[i * 5:(i + 1) * 5] for i in range(5)]
+
+    # 6x6
+    return [square[i * 6:(i + 1) * 6] for i in range(6)]
 
 
 def _find_pos(square, ch):
-    for r in range(5):
-        for c in range(5):
+    for r in range(6):
+        for c in range(6):
             if square[r][c] == ch:
                 return r, c
     return None
@@ -63,11 +68,11 @@ def encrypt(plaintext: str, key: str) -> str:
         ra, ca = _find_pos(square, a)
         rb, cb = _find_pos(square, b)
         if ra == rb:
-            out.append(square[ra][(ca + 1) % 5])
-            out.append(square[rb][(cb + 1) % 5])
+            out.append(square[ra][(ca + 1) % 6])
+            out.append(square[rb][(cb + 1) % 6])
         elif ca == cb:
-            out.append(square[(ra + 1) % 5][ca])
-            out.append(square[(rb + 1) % 5][cb])
+            out.append(square[(ra + 1) % 6][ca])
+            out.append(square[(rb + 1) % 6][cb])
         else:
             out.append(square[ra][cb])
             out.append(square[rb][ca])
@@ -83,11 +88,11 @@ def decrypt(ciphertext: str, key: str) -> str:
         ra, ca = _find_pos(square, a)
         rb, cb = _find_pos(square, b)
         if ra == rb:
-            out.append(square[ra][(ca - 1) % 5])
-            out.append(square[rb][(cb - 1) % 5])
+            out.append(square[ra][(ca - 1) % 6])
+            out.append(square[rb][(cb - 1) % 6])
         elif ca == cb:
-            out.append(square[(ra - 1) % 5][ca])
-            out.append(square[(rb - 1) % 5][cb])
+            out.append(square[(ra - 1) % 6][ca])
+            out.append(square[(rb - 1) % 6][cb])
         else:
             out.append(square[ra][cb])
             out.append(square[rb][ca])
