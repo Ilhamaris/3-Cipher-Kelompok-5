@@ -3,6 +3,7 @@ from ciphers import playfair, vig_auto, aes_cfb
 
 
 import os
+import hashlib
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -18,18 +19,18 @@ os.makedirs(app.config['ENCRYPTED_FOLDER'], exist_ok=True)
 os.makedirs(app.config['DECRYPTED_FOLDER'], exist_ok=True)
 
 
-def derive_aes_key_iv(user_key):
-    """Gunakan input user sebagai KEY untuk Playfair & Vigg, sedangkan plaintext tetap."""
-    plaintext_pf = "KRIPTOGRAFI PLAYFAIR"
+def derive_aes_key_iv(user_key: str):
+    plaintext_pf  = "KRIPTOGRAFI PLAYFAIR"
     plaintext_vig = "KRIPTOGRAFI VIGENERE"
 
-    # Key dari input user
-    pf_ct = playfair.encrypt(plaintext_pf, user_key)
+    pf_ct  = playfair.encrypt(plaintext_pf, user_key)
     vig_ct = vig_auto.encrypt(plaintext_vig, user_key)
 
-    # Ambil hasil cipher sebagai kunci AES
-    aes_key = pf_ct.encode()[:16].ljust(16, b'0')
-    iv = vig_ct.encode()[:16].ljust(16, b'0')
+    material = (pf_ct + vig_ct + user_key).encode('utf-8')
+
+    digest = hashlib.sha256(material).digest()  # 32 byte
+    aes_key = digest[:16]   # 128-bit key
+    iv      = digest[16:32] # 128-bit IV
 
     return aes_key, iv
 
@@ -64,7 +65,7 @@ def encrypt_file():
     output_filename = filename + ".enc"
     output_path = os.path.join(app.config['ENCRYPTED_FOLDER'], output_filename)
     with open(output_path, 'w') as f:
-        f.write(encrypted_hex)
+          f.write(encrypted_hex)
 
     return send_file(output_path, as_attachment=True)
 
